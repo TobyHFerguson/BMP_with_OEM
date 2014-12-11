@@ -11,7 +11,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   # Every Vagrant virtual environment requires a box to build off of.
   config.vm.box = "ol6minimal"
-  config.vm.provision "shell", path: "setup.sh", privileged: true
+  config.vm.hostname = "oemrepo.lab.net"
+  config.ssh.username = "oracle"
+  config.ssh.forward_x11 = "true"
+  config.vm.network "private_network", ip: "192.168.50.4"
+  config.vm.provision "shell", path: "setup.sh", privileged: false
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
   # `vagrant box outdated`. This is not recommended.

@@ -10,16 +10,18 @@ Database zip files are in current directory (you can unzip the database files if
 * Operation
 ** Update the system
 #+BEGIN_SRC sh :tangle setup.sh :shebang "#!/bin/bash"
-yum -y update
+# yum -y update
 #+END_SRC
 ** Install prerequisite packages
 #+BEGIN_SRC sh :tangle setup.sh
-yum -y install unzip oracle-rdbms-server-11gR2-preinstall
+# yum -y install unzip oracle-rdbms-server-11gR2-preinstall
 #+END_SRC
-** Configure oracle user for no password
+** Configure oracle user for no password and to be a valid ssh user
 #+BEGIN_SRC sh :tangle setup.sh
-echo oracle | passwd --stdin oracle
-echo -e 'oracle\tALL=(ALL)\tNOPASSWD: ALL' >/etc/sudoers.d/oracle
+# echo oracle | passwd --stdin oracle
+# echo -e 'oracle\tALL=(ALL)\tNOPASSWD: ALL' >/etc/sudoers.d/oracle
+# cp -r ~vagrant/.ssh ~oracle
+# chown -R oracle:oinstall ~oracle
 #+END_SRC
 ** Configure oracle environment
 #+BEGIN_SRC sh :tangle setup.sh
@@ -49,9 +51,15 @@ unzip -u -d /vagrant /tmp/p10404530_112030_Linux-x86-64_2of7.zip
 }
 #+END_SRC
 ** Install the database
+It is not possible to use the following method to install the database because the db installation spawns off another process and that is run as 'root'. 
 #+BEGIN_SRC sh :tangle setup.sh
-su -c "/vagrant/database/runInstaller -silent -showProgress -ignorePrereq -responseFile /vagrant/db.rsp -waitforcompletion" - oracle
+su -c "/vagrant/database/runInstaller -silent -ignorePrereq -responseFile /vagrant/db.rsp -waitforcompletion" - oracle
 #+END_SRC
+I need to ssh into the machine as user oracle and execute the installation that way. /Or/ I run as a user in the =oinstall= group - that might work. 
+
+No, setting user =vagrant= into the =oinstall= group doesn't fix it.
+
+I'll try putting the insecure key into =~oracle/.ssh/authorized_keys= and see if I can figure out how to ssh in that way.
 ** Configure the listener
 #+BEGIN_SRC sh :tangle setup.sh
 su -c 'netca -silent -responseFile $ORACLE_HOME/assistants/netca/netca.rsp' - oracle
