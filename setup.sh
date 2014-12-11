@@ -28,6 +28,6 @@
 
  netca -silent -responseFile $ORACLE_HOME/assistants/netca/netca.rsp
 
-# su -c 'unzip -u -d ${ORACLE_HOME:?}//assistants/dbca/templates /vagrant/11.2.0.3_Database_Template_for_EM12_1_0_4_Linux_x64.zip' - oracle
+unzip -u -d ${ORACLE_HOME:?}//assistants/dbca/templates /vagrant/11.2.0.3_Database_Template_for_EM12_1_0_4_Linux_x64.zip
 
 # su -c 'dbca -silent -createDatabase -responseFile /vagrant/dbca.rsp' - oracle
