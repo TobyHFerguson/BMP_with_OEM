@@ -32,6 +32,19 @@
 
 #dbca -silent -createDatabase -responseFile /vagrant/dbca.rsp
 
-sudo cp /vagrant/dbora /etc/init.d
-sudo chmod 755 /etc/init.d/dbora
-sudo chkconfig --add dbora
+# sudo cp /vagrant/dbora /etc/init.d
+# sudo chmod 755 /etc/init.d/dbora
+# sudo chkconfig --add dbora
+
+#
+# if [[ -f /etc/oratab ]]
+# then
+#     sed -i 's/N$/Y/' /etc/oratab
+# else
+#     echo "$ORACLE_SID:$ORACLE_HOME:Y" >/tmp/oratab
+#     sudo mv /tmp/oratab /etc
+# fi    
+
+# service dbora start
+
+sqlplus / as sysdba @/vagrant/patch.sql
