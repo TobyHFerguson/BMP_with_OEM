@@ -10,18 +10,18 @@ Database zip files are in current directory (you can unzip the database files if
 * Operation
 ** Update the system
 #+BEGIN_SRC sh :tangle setup.sh :shebang "#!/bin/bash"
-# yum -y update
+sudo yum -y update
 #+END_SRC
 ** Install prerequisite packages
 #+BEGIN_SRC sh :tangle setup.sh
-# yum -y install unzip oracle-rdbms-server-11gR2-preinstall
+sudo yum -y install unzip oracle-rdbms-server-11gR2-preinstall
 #+END_SRC
 ** Configure oracle user for no password and to be a valid ssh user
 #+BEGIN_SRC sh :tangle setup.sh
-# echo oracle | passwd --stdin oracle
-# echo -e 'oracle\tALL=(ALL)\tNOPASSWD: ALL' >/etc/sudoers.d/oracle
-# cp -r ~vagrant/.ssh ~oracle
-# chown -R oracle:oinstall ~oracle
+echo oracle | passwd --stdin
+sudo echo -e 'oracle\tALL=(ALL)\tNOPASSWD: ALL' >/etc/sudoers.d/oracle
+sudo cp -r ~vagrant/.ssh ~oracle
+sudo chown -R oracle:oinstall ~oracle
 #+END_SRC
 ** Configure oracle environment
 #+BEGIN_SRC sh :tangle setup.sh
@@ -34,41 +34,57 @@ EOF
 #+END_SRC
 ** Configure oracle for Enterprise Manager
 #+BEGIN_SRC sh :tangle setup.sh
-sed -i -e '/requiretty$/s/^/#/' -e'/visiblepw$/s/!//'  /etc/sudoers
+sudo sed -i -e '/requiretty$/s/^/#/' -e'/visiblepw$/s/!//'  /etc/sudoers
 #+END_SRC
 ** Construct the base directory
 #+BEGIN_SRC sh :tangle setup.sh
-mkdir -p /u01/app/oracle
-chown -R oracle:oinstall /u01
+sudo mkdir -p /u01/app/oracle
+sudo chown -R oracle:oinstall /u01
 #+END_SRC
 ** Unzip the database files
 =-u= flag means if the files are already there then do nothing.
 The output will be in =/vagrant/database=
 #+BEGIN_SRC sh :tangle setup.sh
 [ -d /vagrant/database ] || {
-unzip -u -d /vagrant /tmp/p10404530_112030_Linux-x86-64_1of7.zip
-unzip -u -d /vagrant /tmp/p10404530_112030_Linux-x86-64_2of7.zip
+unzip -u -d /vagrant p10404530_112030_Linux-x86-64_1of7.zip
+unzip -u -d /vagrant p10404530_112030_Linux-x86-64_2of7.zip
 }
 #+END_SRC
 ** Install the database
-It is not possible to use the following method to install the database because the db installation spawns off another process and that is run as 'root'. 
+This is the critical need for setting up the =oracle= user - if using '=su -c "..." - oracle= then the installer spawns off a sub-process that is the same user as the originating ssh user - if that's not =oracle= then the system will fail.
 #+BEGIN_SRC sh :tangle setup.sh
-su -c "/vagrant/database/runInstaller -silent -ignorePrereq -responseFile /vagrant/db.rsp -waitforcompletion" - oracle
+/vagrant/database/runInstaller -silent -ignorePrereq -responseFile /vagrant/db.rsp -waitforcompletion
 #+END_SRC
-I need to ssh into the machine as user oracle and execute the installation that way. /Or/ I run as a user in the =oinstall= group - that might work. 
 
-No, setting user =vagrant= into the =oinstall= group doesn't fix it.
-
-I'll try putting the insecure key into =~oracle/.ssh/authorized_keys= and see if I can figure out how to ssh in that way.
 ** Configure the listener
 #+BEGIN_SRC sh :tangle setup.sh
-su -c 'netca -silent -responseFile $ORACLE_HOME/assistants/netca/netca.rsp' - oracle
+netca -silent -responseFile $ORACLE_HOME/assistants/netca/netca.rsp
 #+END_SRC
 ** Unzip the database template zip
 #+BEGIN_SRC sh :tangle setup.sh
-su -c 'unzip -u -d ${ORACLE_HOME:?}//assistants/dbca/templates /vagrant/11.2.0.3_Database_Template_for_EM12_1_0_4_Linux_x64.zip' - oracle
+unzip -u -d ${ORACLE_HOME:?}/assistants/dbca/templates /vagrant/11.2.0.3_Database_Template_for_EM12_1_0_4_Linux_x64.zip
 #+END_SRC
 ** Clone the templates to create the database
 #+BEGIN_SRC sh :tangle setup.sh
-su -c 'dbca -silent -createDatabase -responseFile /vagrant/dbca.rsp' - oracle
+dbca -silent -createDatabase -responseFile /vagrant/dbca.rsp
+#+END_SRC
+** Install and configure the dbora service
+#+BEGIN_SRC sh :tangle setup.sh
+sudo cp /vagrant/dbora /etc/init.d
+sudo chmod 755 /etc/init.d/dbora
+sudo chkconfig --add dbora
+
+if [[ -f /etc/oratab ]]
+then
+    sed -i 's/N$/Y/' /etc/oratab
+else
+    echo "$ORACLE_SID:$ORACLE_HOME:Y" >/tmp/oratab
+    sudo mv /tmp/oratab /etc
+fi    
+
+service dbora start
+#+END_SRC
+** Patch the database
+#+BEGIN_SRC sh :tangle setup.sh
+sqlplus / as sysdba @/vagrant/patch.sql
 #+END_SRC
