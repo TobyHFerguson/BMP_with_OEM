@@ -24,7 +24,7 @@ unzip -u -d /vagrant /tmp/p10404530_112030_Linux-x86-64_1of7.zip
 unzip -u -d /vagrant /tmp/p10404530_112030_Linux-x86-64_2of7.zip
 }
 
-su -c "/vagrant/database/runInstaller -silent -showProgress -ignorePrereq -responseFile /vagrant/db.rsp" - oracle
+su -c "/vagrant/database/runInstaller -silent -showProgress -ignorePrereq -responseFile /vagrant/db.rsp -waitforcompletion" - oracle
 
 su -c 'netca -silent -responseFile $ORACLE_HOME/assistants/netca/netca.rsp' - oracle
 

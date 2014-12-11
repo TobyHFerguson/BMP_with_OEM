@@ -1,0 +1,66 @@
+#+TITLE: Oracle 11g for OEM 
+* Overview
+Use vagrant to provision and provide oracle 11g for oem
+* Setup
+Database zip files are in current directory (you can unzip the database files if you wish, or the provisioning process will do it for you)
++ DB template file :: 11.2.0.3_Database_Template_for_EM12_1_0_4_Linux_x64.zip
++ DB zip files :: 
+  + p10404530_112030_Linux-x86-64_1of7.zip
+  + p10404530_112030_Linux-x86-64_2of7.zip
+* Operation
+** Update the system
+#+BEGIN_SRC sh :tangle setup.sh :shebang "#!/bin/bash"
+yum -y update
+#+END_SRC
+** Install prerequisite packages
+#+BEGIN_SRC sh :tangle setup.sh
+yum -y install unzip oracle-rdbms-server-11gR2-preinstall
+#+END_SRC
+** Configure oracle user for no password
+#+BEGIN_SRC sh :tangle setup.sh
+echo oracle | passwd --stdin oracle
+echo -e 'oracle\tALL=(ALL)\tNOPASSWD: ALL' >/etc/sudoers.d/oracle
+#+END_SRC
+** Configure oracle environment
+#+BEGIN_SRC sh :tangle setup.sh
+cat <<EOF  >>/home/oracle/.bash_profile
+export ORACLE_BASE=/u01/app/oracle 
+export ORACLE_HOME=\${ORACLE_BASE:?}/product/11.2.0/db_1
+export ORACLE_SID=oemrepo
+export PATH=\$PATH:\$ORACLE_HOME/bin
+EOF
+#+END_SRC
+** Configure oracle for Enterprise Manager
+#+BEGIN_SRC sh :tangle setup.sh
+sed -i -e '/requiretty$/s/^/#/' -e'/visiblepw$/s/!//'  /etc/sudoers
+#+END_SRC
+** Construct the base directory
+#+BEGIN_SRC sh :tangle setup.sh
+mkdir -p /u01/app/oracle
+chown -R oracle:oinstall /u01
+#+END_SRC
+** Unzip the database files
+=-u= flag means if the files are already there then do nothing.
+The output will be in =/vagrant/database=
+#+BEGIN_SRC sh :tangle setup.sh
+[ -d /vagrant/database ] || {
+unzip -u -d /vagrant /tmp/p10404530_112030_Linux-x86-64_1of7.zip
+unzip -u -d /vagrant /tmp/p10404530_112030_Linux-x86-64_2of7.zip
+}
+#+END_SRC
+** Install the database
+#+BEGIN_SRC sh :tangle setup.sh
+su -c "/vagrant/database/runInstaller -silent -showProgress -ignorePrereq -responseFile /vagrant/db.rsp -waitforcompletion" - oracle
+#+END_SRC
+** Configure the listener
+#+BEGIN_SRC sh :tangle setup.sh
+su -c 'netca -silent -responseFile $ORACLE_HOME/assistants/netca/netca.rsp' - oracle
+#+END_SRC
+** Unzip the database template zip
+#+BEGIN_SRC sh :tangle setup.sh
+su -c 'unzip -u -d ${ORACLE_HOME:?}//assistants/dbca/templates /vagrant/11.2.0.3_Database_Template_for_EM12_1_0_4_Linux_x64.zip' - oracle
+#+END_SRC
+** Clone the templates to create the database
+#+BEGIN_SRC sh :tangle setup.sh
+su -c 'dbca -silent -createDatabase -responseFile /vagrant/dbca.rsp' - oracle
+#+END_SRC
