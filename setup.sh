@@ -26,8 +26,8 @@
 
 # /vagrant/database/runInstaller -silent -ignorePrereq -responseFile /vagrant/db.rsp -waitforcompletion 
 
- netca -silent -responseFile $ORACLE_HOME/assistants/netca/netca.rsp
+#  netca -silent -responseFile $ORACLE_HOME/assistants/netca/netca.rsp
 
-unzip -u -d ${ORACLE_HOME:?}//assistants/dbca/templates /vagrant/11.2.0.3_Database_Template_for_EM12_1_0_4_Linux_x64.zip
+# unzip -u -d ${ORACLE_HOME:?}//assistants/dbca/templates /vagrant/11.2.0.3_Database_Template_for_EM12_1_0_4_Linux_x64.zip
 
-# su -c 'dbca -silent -createDatabase -responseFile /vagrant/dbca.rsp' - oracle
+dbca -silent -createDatabase -responseFile /vagrant/dbca.rsp
