@@ -24,9 +24,9 @@
 # unzip -u -d /vagrant /tmp/p10404530_112030_Linux-x86-64_2of7.zip
 # }
 
-/vagrant/database/runInstaller -silent -ignorePrereq -responseFile /vagrant/db.rsp -waitforcompletion 
+# /vagrant/database/runInstaller -silent -ignorePrereq -responseFile /vagrant/db.rsp -waitforcompletion 
 
-# netca -silent -responseFile $ORACLE_HOME/assistants/netca/netca.rsp
+ netca -silent -responseFile $ORACLE_HOME/assistants/netca/netca.rsp
 
 # su -c 'unzip -u -d ${ORACLE_HOME:?}//assistants/dbca/templates /vagrant/11.2.0.3_Database_Template_for_EM12_1_0_4_Linux_x64.zip' - oracle
 
