@@ -30,4 +30,8 @@
 
 # unzip -u -d ${ORACLE_HOME:?}//assistants/dbca/templates /vagrant/11.2.0.3_Database_Template_for_EM12_1_0_4_Linux_x64.zip
 
-dbca -silent -createDatabase -responseFile /vagrant/dbca.rsp
+#dbca -silent -createDatabase -responseFile /vagrant/dbca.rsp
+
+sudo cp /vagrant/dbora /etc/init.d
+sudo chmod 755 /etc/init.d/dbora
+sudo chkconfig --add dbora
