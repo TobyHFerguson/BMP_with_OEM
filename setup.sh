@@ -1,15 +1,10 @@
 #!/bin/bash
 
-#sudo yum -y update
+sudo yum -y -q update
 
-sudo yum -y install unzip oracle-rdbms-server-11gR2-preinstall
+sudo yum -y -q install unzip oracle-rdbms-server-11gR2-preinstall
 
-sudo cat <<EOF  >>/home/oracle/.bash_profile
-export ORACLE_BASE=/u01/app/oracle 
-export ORACLE_HOME=\${ORACLE_BASE:?}/product/11.2.0/db_1
-export ORACLE_SID=oemrepo
-export PATH=\$PATH:\$ORACLE_HOME/bin
-EOF
+sudo su -c 'cat /vagrant/oracle_profile  >>/home/oracle/.bash_profile' - oracle
 
 sudo sed -i -e '/requiretty$/s/^/#/' -e'/visiblepw$/s/!//'  /etc/sudoers
 
@@ -22,7 +17,10 @@ unzip -u -d /vagrant p10404530_112030_Linux-x86-64_2of7.zip
 }
 
 
-sudo "su -c /vagrant/database/runInstaller -silent -ignorePrereq -responseFile /vagrant/db.rsp -waitforcompletion - oracle"
+sudo su -c "/vagrant/database/runInstaller -silent -ignorePrereq -responseFile /vagrant/db.rsp -waitforcompletion" - oracle
+
+sudo /u01/app/oraInventory/orainstRoot.sh
+sudo /u01/app/oracle/product/11.2.0/db_1/root.sh
 
 sudo su -c 'netca -silent -responseFile $ORACLE_HOME/assistants/netca/netca.rsp' - oracle
 
