@@ -6,13 +6,15 @@ Assumes Vagrant & Virtualbox are available, and the =ol6minimal= Vagrant box is 
 
 =ol6minimal= can be obtained from MY GITHUP PROJECT
 * Setup
+Make a directory into which all this will be done.
+
 Download database zip files from Oracle into the current directory. 
 
 The database is 11.2.0.3.0, downloadable as patch 10404530 from My Oracle Support. You must have an Oracle license to download and use the database.
 
 The database template zip file is at http://www.oracle.com/technetwork/oem/enterprise-manager/downloads/db-templates-1959276.html
 
-Files needed and links are:
+Files needed are:
 | file                                                    | Description                      |
 |---------------------------------------------------------+----------------------------------|
 | p10404530_112030_Linux-x86-64_1of7.zip                  | 11g db install                   |
@@ -21,6 +23,13 @@ Files needed and links are:
 Database zip files are in current directory (you can unzip the database files if you wish, or the provisioning process will do it for you)
 * Operation
 Super Simple (thanks to Vagrant!)
+
+Clone this repo into the current directory
+#+BEGIN_SRC sh
+git clone https://github.com/TobyHFerguson/BMP_with_OEM.git .
+#+END_SRC
+Make sure you've downloaded the database files into the current directory.
+
 Initialize the VM and it will provision itself (look inside =setup.sh= to see what's going on)
 #+BEGIN_SRC sh
 vagrant up
