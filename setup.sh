@@ -13,8 +13,8 @@ sudo chown -R oracle:oinstall /u01
 
 # Unzip the database install files, if not already done
 [ -d /vagrant/database ] || {
-unzip -u -d /vagrant p10404530_112030_Linux-x86-64_1of7.zip
-unzip -u -d /vagrant p10404530_112030_Linux-x86-64_2of7.zip
+unzip -u -d /vagrant /vagrant/p10404530_112030_Linux-x86-64_1of7.zip
+unzip -u -d /vagrant /vagrant/p10404530_112030_Linux-x86-64_2of7.zip
 }
 
 # Install the db
